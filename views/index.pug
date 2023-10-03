@@ -1,0 +1,42 @@
+extends layout.pug 
+
+block content
+  h1= title
+
+  //- add a form to upload the file and a textarea to add the config yaml
+  form(method="POST" action="/upload" enctype="multipart/form-data")
+    label(for="experimentName") Experiment Name: 
+    input(type="text" name="experimentName")
+    br
+    label(for="config") Add the config yaml: 
+    textarea(name="config" rows="10" cols="50")
+    br
+    label(for="file") Upload the zip file: 
+    input(type="file" name="file")
+    br
+    input(type="submit" value="Submit")
+  
+  br
+
+  //- add a table to show the list of experiments (if any)
+  if experiments.length
+    table(width="100%" border="1" border-style="solid")
+      thead
+        tr
+          th Experiment Name
+          th File Uploaded 
+          th Status 
+          th Current Step
+          th Start Time
+      tbody 
+        each experiment in experiments
+          tr
+            td= experiment.experimentName
+            td= experiment.unzippedFolderName
+            td= experiment.status
+            td= experiment.currentFunction
+            td= experiment.createdAt
+  else
+    p No experiments found
+
+  

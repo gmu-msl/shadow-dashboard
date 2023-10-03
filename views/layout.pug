@@ -1,0 +1,20 @@
+html 
+    head 
+        title= title 
+
+        block additionalHead
+    body 
+        div(class="container")
+            //- display message if there is one
+            if message
+                div(class="alert alert-success")
+                    strong Message: 
+                    span= message
+            //- display error if there is one
+            if error
+                div(class="alert alert-danger")
+                    strong Error: 
+                    span= error
+            block content
+    
+    

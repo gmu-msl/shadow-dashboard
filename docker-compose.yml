@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:7.2
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == sr3s13 # place this on sr3s13
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    command: redis-server --bind 0.0.0.0 --appendonly yes # enable persistence using AOF
+
+  dashboard:
+    image: sr4s5.mesa.gmu.edu:5000/shadow-dashboard:amd64
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == sr3s13 # place this on sr3s13
+    ports:
+      - 8080:8080
+    volumes:
+      - processor_data_nfs:/usr/src/app/processor-common-folder
+    environment:
+      - REDIS_HOST=redis
+      - PORT=8080
+    command: npm start
+
+volumes:
+  processor_data_nfs:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.192.113.102,rw,nfsvers=4
+      device: ':/vol/vol1_home/docker/docker-swarm-volumes/processor-common-folder'
+  redis-data:
+    driver: local # this is a local volume, not on NFS

@@ -1,0 +1,10 @@
+*.zip
+
+node_modules/
+.vscode/
+
+__pycache__/
+
+# ignore all config files for processor
+
+processors/*/*.yaml

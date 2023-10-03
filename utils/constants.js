@@ -1,0 +1,6 @@
+// Add all constants here
+const REDIS_DASHBOARD_EXPERIMENTS_SET = 'REDIS_DASHBOARD_EXPERIMENTS_SET';
+
+module.exports = {
+  REDIS_DASHBOARD_EXPERIMENTS_SET,
+};
