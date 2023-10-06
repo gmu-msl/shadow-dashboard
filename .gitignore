@@ -8,3 +8,5 @@ __pycache__/
 # ignore all config files for processor
 
 processors/*/*.yaml
+
+uploads/ # ignore all uploads

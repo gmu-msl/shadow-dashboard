@@ -14,6 +14,21 @@ block content
     label(for="file") Upload the zip file: 
     input(type="file" name="file")
     br
+    p OR 
+    br
+    label(for="fileLink") Or add the link to the zip file:
+    input(type="text" name="fileLink")
+    //- br
+    //- p OR 
+    //- br
+    //- label(for="pickleFile") Upload the pickle file:
+    //- input(type="file" name="pickleFile")
+    //- br
+    //- p OR
+    //- br
+    //- label(for="pickleFileLink") Or add the link to the pickle file:
+    //- input(type="text" name="pickleFileLink")
+    br
     input(type="submit" value="Submit")
   
   br
@@ -28,7 +43,9 @@ block content
           th Status 
           th Current Step
           th Start Time
-      tbody 
+          th End Time
+          th  
+      tbody(align="center") 
         each experiment in experiments
           tr
             td= experiment.experimentName
@@ -36,6 +53,9 @@ block content
             td= experiment.status
             td= experiment.currentFunction
             td= experiment.createdAt
+            td= experiment.completedAt
+            td
+              a(href="/experiments/" + experiment.experimentName) View
   else
     p No experiments found
 

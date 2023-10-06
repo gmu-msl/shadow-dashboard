@@ -26,9 +26,11 @@ services:
     volumes:
       - processor_data_nfs:/usr/src/app/processor-common-folder
     environment:
-      - DEBUG=http,express:*
+      # - DEBUG=http,express:*
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - PORT=8080
+      - SHARED_FOLDER=processor-common-folder # path from app
     command: npm start
 
 volumes:

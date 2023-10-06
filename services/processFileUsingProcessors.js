@@ -2,24 +2,39 @@
 const fs = require('fs');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const crypto = require('crypto');
 
-const { updateExperimentInDashboard } = require('../models/dashboard');
+const {
+  REDIS_HOST,
+  SHARED_FOLDER,
+  PROCESSOR_PATH,
+  REDIS_JOB_NOTIFY_CHANNEL,
+} = require('../utils/constants');
+
+const {
+  updateExperimentInDashboard,
+  addLogToLogList,
+  updateJobsCreatedForExperimentByChekingListInRedis,
+  publishMessageToJobsTopic,
+} = require('../models/experiment');
 
 const processUsingPythonProcessor = async ({
   originalFileName,
-  filenameInUploads,
   path,
   experimentName,
   config,
   unzippedFolderName,
+  pickleFileName,
+  redisTopicForJobs,
+  logListKey,
 }) => {
   try {
     // update the experiment to say processing
     await updateExperimentInDashboard(experimentName, {
       status: 'processing',
+      currentFunction: 'unzip',
     });
 
-    const processorPath = './processors/preprocess-python';
     // 1. Move file to processor (tmp with the experiment name)
     const processorFilePath = `./processors/preprocess-python/${experimentName}`;
 
@@ -32,6 +47,11 @@ const processUsingPythonProcessor = async ({
     // 2. unzip file
     const unzipCommand = `unzip ${processorFilePath}/${originalFileName} -d ${processorFilePath}`;
     const unzipCommandExec = await exec(unzipCommand);
+
+    await addLogToLogList(logListKey, {
+      stdout: unzipCommandExec.stdout,
+      stderr: unzipCommandExec.stderr,
+    });
 
     // 3. remove the zip file, we don't need it anymore
     fs.unlinkSync(`${processorFilePath}/${originalFileName}`);
@@ -56,8 +76,12 @@ const processUsingPythonProcessor = async ({
     const pcapToCsvCommand = `cd ${csvFolder} && ../../../pcap_to_csv.sh ../`;
     const pcapToCsvCommandExec = await exec(pcapToCsvCommand);
 
-    console.log(pcapToCsvCommandExec);
+    await addLogToLogList(logListKey, {
+      stdout: pcapToCsvCommandExec.stdout,
+      stderr: pcapToCsvCommandExec.stderr,
+    });
 
+    // move the pythonServerThread.log to the server_log folder as pythonServerThread.stdout
     fs.renameSync(
       `${processorFilePath}/${unzippedFolderName}/pythonServerThread.log`,
       `${processorFilePath}/${unzippedFolderName}/server_log/pythonServerThread.stdout`
@@ -75,15 +99,78 @@ const processUsingPythonProcessor = async ({
     const configFileParam = `./${experimentName}/${unzippedFolderName}/config.yaml`;
     const csvFolderParam = `./${experimentName}/${unzippedFolderName}/csv/`;
     const serverLogFolderParam = `./${experimentName}/${unzippedFolderName}/server_log/`;
-    const processorCommand = `cd ${processorPath} && python3 loadFilesAndGeneratePickle.py ${configFileParam} ${experimentName} ${csvFolderParam} ${serverLogFolderParam} localhost ${experimentName}`;
+
+    const processorCommand = `cd ${PROCESSOR_PATH} && python3 loadFilesAndGeneratePickle.py ${configFileParam} ${pickleFileName} ${csvFolderParam} ${serverLogFolderParam}`;
     const processorCommandExec = await exec(processorCommand);
 
-    console.log(processorCommandExec);
+    await addLogToLogList(logListKey, {
+      stdout: processorCommandExec.stdout,
+      stderr: processorCommandExec.stderr,
+    });
+
+    await updateExperimentInDashboard(experimentName, {
+      currentFunction: 'generateTasks.py',
+      pickleFileName,
+    });
+
+    const generateTasksCommand = `cd ${PROCESSOR_PATH} && python3 generateTasks.py ${experimentName} ${pickleFileName} ${REDIS_HOST} ${redisTopicForJobs}`;
+    const generateTasksCommandExec = await exec(generateTasksCommand);
+
+    await addLogToLogList(logListKey, {
+      stdout: generateTasksCommandExec.stdout,
+      stderr: generateTasksCommandExec.stderr,
+    });
+
+    await updateJobsCreatedForExperimentByChekingListInRedis(
+      experimentName,
+      redisTopicForJobs
+    );
+
+    // move the pickle file to the shared folder
+    let pickleFilePath = `${PROCESSOR_PATH}/${pickleFileName}`;
+
+    const gzipPickleFileCommand = `gzip ${pickleFilePath}`;
+    const gzipPickleFileCommandExec = await exec(gzipPickleFileCommand);
+
+    await addLogToLogList(logListKey, {
+      stdout: gzipPickleFileCommandExec.stdout,
+      stderr: gzipPickleFileCommandExec.stderr,
+    });
+
+    pickleFilePath = `${PROCESSOR_PATH}/${pickleFileName}.gz`;
+
+    const cpPickleFileCommand = `cp ${pickleFilePath} ${SHARED_FOLDER}`;
+    const cpPickleFileCommandExec = await exec(cpPickleFileCommand);
+
+    await addLogToLogList(logListKey, {
+      stdout: cpPickleFileCommandExec.stdout,
+      stderr: cpPickleFileCommandExec.stderr,
+    });
+
+    // delete the pickle file from the processor
+    fs.unlinkSync(pickleFilePath);
+
     await updateExperimentInDashboard(experimentName, {
       status: 'done',
       currentFunction: '',
+      completedAt: new Date().toISOString(),
     });
+
+    // remove the file from the uploads folder
+    fs.unlinkSync(path);
+
+    // publish a message to the jobs topic to notify the workers
+    const message = JSON.stringify({
+      experimentName,
+      pickleFileName,
+      redisTopicForJobs,
+    });
+
+    await publishMessageToJobsTopic(REDIS_JOB_NOTIFY_CHANNEL, message);
   } catch (error) {
+    await updateExperimentInDashboard(experimentName, {
+      status: 'error',
+    });
     throw error;
   }
 };

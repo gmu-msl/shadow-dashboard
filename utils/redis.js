@@ -1,11 +1,8 @@
 const redis = require('redis');
 
-console.log(process.env.REDIS_HOST);
+const { REDIS_HOST, REDIS_PORT } = require('./constants');
 
-const redisHost = process.env.REDIS_HOST || 'redis'; // docker-compose service name
-const redisPort = process.env.REDIS_PORT || 6379;
-
-const redisUrl = `redis://${redisHost}:${redisPort}}`;
+const redisUrl = `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
 const client = redis.createClient({
   url: redisUrl,
@@ -13,7 +10,7 @@ const client = redis.createClient({
 });
 
 client.on('error', (err) => {
-  console.log('error', err, process.env.REDIS_HOST, process.env.REDIS_PORT);
+  console.log('error', err, REDIS_HOST, REDIS_PORT);
 });
 
 client.on('connect', () => {

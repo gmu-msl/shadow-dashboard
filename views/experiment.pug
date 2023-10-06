@@ -1,0 +1,43 @@
+extends layout.pug
+
+block content 
+    h1= title
+
+    table(width="100%" border="1" border-style="solid")
+        thead
+            tr 
+                th Key 
+                th Value
+        tbody(align="center")
+            tr
+                td Experiment Name
+                td= experiment.experimentName
+            tr
+                td File Uploaded
+                td= experiment.unzippedFolderName
+            tr
+                td Status
+                td= experiment.status
+            tr
+                td Current Step
+                td= experiment.currentFunction
+            tr
+                td Start Time
+                td= experiment.createdAt
+            tr
+                td End Time
+                td= experiment.completedAt
+            tr
+                td Pickle File
+                td= experiment.pickleFile
+            tr
+                td Config Uploaded 
+                td= experiment.config
+            tr
+                td Jobs Created 
+                td= experiment.jobsCreated
+            tr
+                td Logs 
+                td 
+                    each log in experiment.logList
+                        p= log

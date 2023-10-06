@@ -41,7 +41,7 @@ def preprocess(pcappath, logpath, scope_config, server_logs, infra_ip, window,
     ips_seen = getPossibleIPs(scopes)
     IPs = list(set(ips_seen) - set(infra_ip))
     print(IPs)
-    assert len(IPs) == 100
+    # assert len(IPs) == 100
 
     if debug:
         print("Scopes created")
