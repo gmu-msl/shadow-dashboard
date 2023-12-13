@@ -1,0 +1,87 @@
+extends layout.pug
+
+block additionalHead 
+    script(src="/js/experimentResult.js")
+
+block content 
+    h1= title
+
+    if error 
+        p= error
+
+    if resultsExist 
+        div(id="searchDiv")
+            label(for="search") Search:
+            input(type="text", id="searchInputField", placeholder="Search for a username", name="searchInput")
+            //- We will reload the page with the search query as a parameter on click
+            button(id="searchButton", onclick="searchButtonClicked()") Search
+
+        div(id="resultsDiv")
+            if userResultExists && usernameSearch !== ""
+                b 
+                    p= "User Search Results for " + usernameSearch
+                
+                table(id="userResultsTable", width="100%" border="1" border-style="solid")
+                    thead 
+                        tr 
+                            th Rank 
+                            th IP
+                            th Feature Set 
+                    tbody 
+                        each val, key in resultsObject 
+                            tr 
+                                td(align="center")= val.rank
+                                td(align="center")
+                                    b 
+                                        //- add p tag with ip address, a bigger font size and a bg color of light green
+                                        p(style="font-size: 20px; background-color: lightgreen;")= key
+                                td(align="center")= val.features.length > 5 ? val.features.slice(0,5) + " ...." : val.features
+
+                //- table(id="userResultsTable", width="100%" border="1" border-style="solid")
+                //-     thead 
+                //-         tr 
+                //-             th relative coefficient 
+                //-             th ip 
+                //-             th file
+                //-             th feature 
+                //-     tbody
+                //-         each value in userResults.results
+                //-             tr 
+                //-                 td(align="center")= value.relativeCoefficient
+                //-                 td(align="center")= value.ipGuessed
+                //-                 td(align="center")= value.file
+                //-                 td(align="center")= value.feature
+                
+            else 
+                if usernameSearch !== ""
+                    p= "No user results found for " + usernameSearch
+        //- add a horizontal rule
+        hr
+        b 
+            p= "Global Analysis Results: "
+        each val, key in results 
+            b
+                p= "Results for " + key + ":"
+            table(id="resultsTable"+key, width="100%" border="1" border-style="solid")
+                thead 
+                    tr 
+                        th accuracy 
+                        th recall @ 2
+                        th recall @ 4
+                        th recall @ 8
+                        th feature  
+                tbody 
+                    each value in results[key]
+                        tr 
+                            td(align="center")= value.accuracy 
+                            td(align="center")= value.recall2
+                            td(align="center")= value.recall4
+                            td(align="center")= value.recall8
+                            td(align="center")= value.feature
+
+    else
+        p= "No results yet"
+        if results.message
+            p= "Processing Status: " + results.message
+
+        a(href="/experiments/" + experiment.experimentName + "/results/process") Process Results 

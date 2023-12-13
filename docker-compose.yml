@@ -1,6 +1,19 @@
-version: '3.7'
+version: '3.8'
 
 services:
+  mongo:
+    image: mongo:7
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == sr3s13 # place this on sr3s13
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+    command: mongod --bind_ip_all
+
   redis:
     image: redis:7.2
     deploy:
@@ -27,12 +40,28 @@ services:
       - processor_data_nfs:/usr/src/app/processor-common-folder
     environment:
       # - DEBUG=http,express:*
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - PORT=8080
       - SHARED_FOLDER=processor-common-folder # path from app
     command: npm start
 
+  evaluator:
+    image: sr4s5.mesa.gmu.edu:5000/shadow-evaluator:amd64
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1 # only one evaluator per node
+    volumes:
+      - processor_data_nfs:/app/processor-common-folder
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_JOB_NOTIFY_CHANNEL=REDIS_JOB_NOTIFY_CHANNEL
+      - SHARED_FOLDER=processor-common-folder # path from app
+      - SYSTEM_HOSTNAME="{{.Node.Hostname}}" # this is the hostname of the node the container is running on
 volumes:
   processor_data_nfs:
     driver: local
@@ -41,4 +70,6 @@ volumes:
       o: addr=10.192.113.102,rw,nfsvers=4
       device: ':/vol/vol1_home/docker/docker-swarm-volumes/processor-common-folder'
   redis-data:
+    driver: local # this is a local volume, not on NFS
+  mongo-data:
     driver: local # this is a local volume, not on NFS

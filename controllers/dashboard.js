@@ -42,24 +42,30 @@ const viewDashboard = async (req, res) => {
  */
 const handleUpload = async (req, res) => {
   try {
+    const files = req.files;
+
     // Validate form data
-    if (
-      !req.file &&
-      !req.body.fileLink &&
-      !req.body.pickleFile &&
-      !req.body.pickleFileLink
-    ) {
-      // if either zip file or pickle file or their links are not present, then redirect to the dashboard
+    if (!files && Object.keys(files).length === 0) {
       return res.redirect('/');
     }
 
-    // if both zip file and pickle file are present, then redirect to the dashboard, because we only need one of them
-    if (
-      req.file &&
-      req.body.pickleFile &&
-      req.body.pickleFileLink &&
-      req.body.fileLink
-    ) {
+    if (!files.pickleFile && !files.file) {
+      // if both zip file and pickle file are not present, then redirect to the dashboard
+      return res.redirect('/');
+    }
+
+    let pickleFile, zipFile;
+
+    if (files.pickleFile) {
+      pickleFile = files.pickleFile[0];
+    }
+
+    if (files.file) {
+      zipFile = files.file[0];
+    }
+
+    if (!!pickleFile && !!zipFile) {
+      // if both zip file and pickle file are present, then redirect to the dashboard, because we only need one of them
       return res.redirect('/');
     }
 
@@ -71,6 +77,8 @@ const handleUpload = async (req, res) => {
     if (!form.config) {
       return res.redirect('/');
     }
+
+    const fileType = Object.keys(pickleFile).length > 0 ? 'pickle' : 'zip';
 
     const { fileLink } = req.body;
 
@@ -89,22 +97,31 @@ const handleUpload = async (req, res) => {
       const curlCommandToDownload = `curl -o uploads/${originalname} ${fileLink}`;
       const curlCommandToDownloadExec = await exec(curlCommandToDownload);
       console.log(curlCommandToDownloadExec);
+    } else if (fileType === 'pickle') {
+      originalname = pickleFile.originalname;
+      filename = pickleFile.filename;
+      path = pickleFile.path;
     } else {
-      originalname = req.file.originalname;
-      filename = req.file.filename;
-      path = req.file.path;
+      originalname = zipFile.originalname;
+      filename = zipFile.filename;
+      path = zipFile.path;
     }
 
     const { experimentName, config } = req.body;
 
-    const checkUnzippedFolderNameInZipCommand = `unzip -qql ${path} | head -n1 | tr -s ' ' | cut -d' ' -f5-`;
-    const checkUnzippedFolderNameInZipCommandExec = await exec(
-      checkUnzippedFolderNameInZipCommand
-    );
+    let unzippedFolderName = '';
+    if (fileType === 'zip') {
+      const checkUnzippedFolderNameInZipCommand = `unzip -qql ${path} | head -n1 | tr -s ' ' | cut -d' ' -f5-`;
+      const checkUnzippedFolderNameInZipCommandExec = await exec(
+        checkUnzippedFolderNameInZipCommand
+      );
 
-    const unzippedFolderName = checkUnzippedFolderNameInZipCommandExec.stdout
-      .split('/')[0]
-      .trim();
+      unzippedFolderName = checkUnzippedFolderNameInZipCommandExec.stdout
+        .split('/')[0]
+        .trim();
+    } else {
+      unzippedFolderName = originalname.split('.')[0]; // remove the .pkl extension and .gz extension
+    }
 
     // Check if experiment already exists
     const experimentHash = await checkAndReturnExistingExperiment(
@@ -119,8 +136,14 @@ const handleUpload = async (req, res) => {
     }
 
     const randomUUID = crypto.randomUUID().toString();
-    const pickleFileName = `${experimentName}-${randomUUID}.pkl`;
-    const logListKey = `${experimentName}-${randomUUID}-log-list`;
+    const pickleFileName =
+      fileType == 'pickle'
+        ? `${unzippedFolderName}.pkl`
+        : `${experimentName}-${randomUUID}.pkl`;
+    const logListKey =
+      fileType == 'pickle'
+        ? `${unzippedFolderName}-log-list`
+        : `${experimentName}-${randomUUID}-log-list`;
 
     // Create the experiment object using the experimentObjectStructure
     const experimentHashToStore = new experimentObject({
@@ -156,6 +179,7 @@ const handleUpload = async (req, res) => {
       pickleFileName,
       redisTopicForJobs: `${experimentName}-${randomUUID}`,
       logListKey,
+      uploadedPickleFile: fileType === 'pickle' ? pickleFile : '',
     });
 
     // Redirect the user to the dashboard

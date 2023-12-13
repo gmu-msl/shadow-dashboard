@@ -32,10 +32,19 @@ block content
                 td= experiment.pickleFile
             tr
                 td Config Uploaded 
-                td= experiment.config
+                td
+                    pre= experiment.config
             tr
                 td Jobs Created 
                 td= experiment.jobsCreated
+            tr 
+                td Jobs Progess
+                td= experiment.jobsCompleted + "/" + experiment.jobsCreated
+            if completed
+                tr 
+                    td 
+                    td 
+                        a(href="/experiments/" + experiment.experimentName + "/results") View Results
             tr
                 td Logs 
                 td 

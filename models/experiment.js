@@ -166,9 +166,14 @@ const getExperimentForViewExperiment = async (experimentName) => {
     // reverse the log list so that the order is preserved
     logList = logList.reverse();
 
+    // for the experiment, get the jobs count
+    const jobsLength = await redisClient.lLen(experimentHash.jobsTopic);
+    const jobsCompleted = experimentHash.jobsCreated - jobsLength;
+
     const experiment = {
       ...experimentHash,
       logList,
+      jobsCompleted,
     };
 
     return experiment;

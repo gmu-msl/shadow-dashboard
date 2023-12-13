@@ -7,6 +7,9 @@ const cors = require('cors');
 // initialize constants
 require('./utils/constants');
 
+// import db just to initialize the connection
+require('./utils/db');
+
 const routes = require('./routes');
 
 // setup middlewares
@@ -23,6 +26,9 @@ app.use(
 // setup template engine
 app.set('view engine', 'pug');
 app.set('views', './views');
+
+// setup static files
+app.use(express.static('public'));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

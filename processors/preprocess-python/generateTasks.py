@@ -64,7 +64,7 @@ for output_size in range(1, len(client_chat_logs) + 1):
                     "src_feature": src_feature,
                     "dst_feature": features
                 }
-                task["filename"] = experiment_name + str(
+                task["filename"] = experiment_name + "_" + str(
                     n) + "_outputFeatures_" + str(features) + "_" + str(datetime.now()) + ".output"
                 tasks.append(task)
 
