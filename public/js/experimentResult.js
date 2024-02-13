@@ -16,3 +16,22 @@ searchButtonClicked = function () {
   // Redirect to the new url
   window.location.href = newUrl;
 };
+
+// This function is called when the document is loaded
+document.addEventListener('DOMContentLoaded', function () {
+  // collapsible code
+  var coll = document.getElementsByClassName('collapsible');
+  var i;
+
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener('click', function () {
+      this.classList.toggle('active');
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+      }
+    });
+  }
+});

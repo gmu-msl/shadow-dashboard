@@ -38,6 +38,8 @@ const viewExperimentResults = async (req, res) => {
     const { username } = req.query;
 
     const experiment = await getExperimentForViewExperiment(experimentName);
+    const experimentCompleted =
+      parseInt(experiment.jobsCompleted) === parseInt(experiment.jobsCreated);
     const [resultsExist, results] = await getExperimentResults(experimentName);
 
     if (!experiment) {
@@ -48,12 +50,35 @@ const viewExperimentResults = async (req, res) => {
     let totalUserResults = 0;
     let resultsObject = {};
     if (username && username !== '') {
-      userResults = await UserResults.findOne(
-        { username },
-        { results: { $slice: 100 }, total: { $size: '$results' } }
-      );
+      // userResults = await UserResults.findOne(
+      //   { username },
+      //   { results: { $slice: 100 }, total: { $size: '$results' } }
+      // );
+      userResults = await UserResults.aggregate([
+        { $match: { username } },
+        {
+          $project: {
+            results: {
+              $slice: [
+                {
+                  $filter: {
+                    input: '$results',
+                    as: 'result',
+                    cond: {
+                      $eq: ['$$result.experimentName', experimentName],
+                    },
+                  },
+                },
+                100,
+              ], // limit_number is the number of elements you want to keep
+            },
+            total: { $size: '$results' },
+          },
+        },
+      ]);
 
       if (userResults) {
+        userResults = userResults[0];
         totalUserResults = userResults.total;
       }
 
@@ -97,6 +122,7 @@ const viewExperimentResults = async (req, res) => {
       totalUserResults,
       currentTotalUserResults: userResults ? userResults.results?.length : 0,
       resultsObject: userResults ? resultsObject : {},
+      completed: experimentCompleted,
     });
   } catch (error) {
     console.log(error);

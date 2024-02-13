@@ -5,7 +5,7 @@ block content
 
   //- add a form to upload the file and a textarea to add the config yaml
   form(method="POST" action="/upload" enctype="multipart/form-data")
-    label(for="experimentName") Experiment Name: 
+    label(for="experimentName") Evaluation Name: 
     input(type="text" name="experimentName")
     br
     label(for="config") Add the config yaml: 
@@ -33,7 +33,7 @@ block content
     table(width="100%" border="1" border-style="solid")
       thead
         tr
-          th Experiment Name
+          th Evaluation Name
           th File Uploaded 
           th Status 
           th Current Step
@@ -50,7 +50,7 @@ block content
             td= experiment.createdAt
             td= experiment.completedAt
             td
-              a(href="/experiments/" + experiment.experimentName) View
+              a(href="/experiments/" + experiment.experimentName + "/results") View
   else
     p No experiments found
 

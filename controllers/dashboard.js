@@ -44,29 +44,44 @@ const handleUpload = async (req, res) => {
   try {
     const files = req.files;
 
-    // Validate form data
-    if (!files && Object.keys(files).length === 0) {
-      return res.redirect('/');
-    }
-
-    if (!files.pickleFile && !files.file) {
-      // if both zip file and pickle file are not present, then redirect to the dashboard
-      return res.redirect('/');
-    }
+    const { fileLink } = req.body;
 
     let pickleFile, zipFile;
+    let fileType = '';
 
-    if (files.pickleFile) {
-      pickleFile = files.pickleFile[0];
-    }
+    if (!fileLink) {
+      // if file link is empty, then we need to check if the files are present
+      // Validate form data
+      if (!files && Object.keys(files).length === 0) {
+        return res.redirect('/');
+      }
 
-    if (files.file) {
-      zipFile = files.file[0];
-    }
+      if (!files.pickleFile && !files.file) {
+        // if both zip file and pickle file are not present, then redirect to the dashboard
+        return res.redirect('/');
+      }
 
-    if (!!pickleFile && !!zipFile) {
-      // if both zip file and pickle file are present, then redirect to the dashboard, because we only need one of them
-      return res.redirect('/');
+      if (files.pickleFile) {
+        pickleFile = files.pickleFile[0];
+      }
+
+      if (files.file) {
+        zipFile = files.file[0];
+      }
+
+      if (!!pickleFile && !!zipFile) {
+        // if both zip file and pickle file are present, then redirect to the dashboard, because we only need one of them
+        return res.redirect('/');
+      }
+
+      fileType =
+        pickleFile && Object.keys(pickleFile).length > 0 ? 'pickle' : 'zip';
+    } else {
+      if (fileLink === '') {
+        return res.redirect('/');
+      }
+
+      fileType = 'zip'; // if file link is present, then we assume it is a zip file
     }
 
     const form = req.body;
@@ -77,10 +92,6 @@ const handleUpload = async (req, res) => {
     if (!form.config) {
       return res.redirect('/');
     }
-
-    const fileType = Object.keys(pickleFile).length > 0 ? 'pickle' : 'zip';
-
-    const { fileLink } = req.body;
 
     // if picklefile or picklefile link is given, we need not run the entire process
     // but we just run the generate tasks from the pickle file.

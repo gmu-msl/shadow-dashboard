@@ -9,3 +9,5 @@ node_modules/
 uploads/*
 
 *.zip
+*.pkl.gz
+*.pkl
