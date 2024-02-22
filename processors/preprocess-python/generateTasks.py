@@ -1,15 +1,14 @@
 import redis
 import json
 import sys
-import itertools
 import pickle
-import yaml
 from datetime import datetime
 
 # setting path
 sys.path.append('../../flow2text/src')
 
 from CastCol import cast_columns
+from experiment_runner import findsubsets, get_features
 
 
 if len(sys.argv) < 5:
@@ -38,28 +37,13 @@ for ip in flows_ts_ip_total:
 for user in client_chat_logs:
     cast_columns(client_chat_logs[user])
 
-# helper functions
-
-
-def findsubsets(s, n):
-    return list(itertools.combinations(s, n))
-
-
-def get_features(df):
-    features = []
-    for src in df:
-        features += df[src].columns.tolist()
-    return list(set(features))
-
-
 # get tasks
 tasks = []
 
 for n in range(1, 3):
     for output_size in range(1, len(client_chat_logs) + 1):
         for features in findsubsets(get_features(client_chat_logs), output_size):
-            src_features_for_dst_features = findsubsets(
-                get_features(flows_ts_ip_total), n)
+            src_features_for_dst_features = findsubsets(get_features(flows_ts_ip_total), n)
             key = f"{output_size}_{n}_{features}"
             for src_feature in src_features_for_dst_features:
                 task = {
