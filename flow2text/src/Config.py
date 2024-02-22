@@ -5,14 +5,21 @@ from TDA import TDA_Parameters
 
 
 class DataConfig:
-    def __init__(self, config):
+    def __init__(self, config, pcappath=None, logpath=None):
         self.p_filename = config['experiment_name'] + "_ts.pkl.gz"
 
         module = importlib.import_module('ScopeFilters')
         for scope in config['scope_config']:
             scope[2] = getattr(module, scope[2])
-        self.pcappath = config['pcappath']
-        self.logpath = config['logpath']
+        if pcappath is not None:
+            self.pcappath = pcappath
+        else:
+            self.pcappath = config['pcappath']
+
+        if logpath is not None:
+            self.logpath = logpath
+        else:
+            self.logpath = config['logpath']
         self.scope_config = config['scope_config']
         self.server_logs = config['server_logs']
         self.infra_ip = config['infra_ip']
@@ -31,10 +38,10 @@ class ModelConfig:
         if config['multiISP']:
             self.ip_to_user = ip_to_user_multi
         self.tda_config = TDA_Parameters(config['dim'],
-                                    config['tda_window'],
-                                    config['skip'],
-                                    config['k'],
-                                    float(config['thresh']))
+                                         config['tda_window'],
+                                         config['skip'],
+                                         config['k'],
+                                         float(config['thresh']))
 
 
 def configFactory(config):
