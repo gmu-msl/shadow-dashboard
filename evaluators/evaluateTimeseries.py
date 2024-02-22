@@ -2,21 +2,18 @@ import redis
 import pickle
 import os
 import json
-import heapq
-import math
 import multiprocessing as mp
 from tqdm import tqdm
-import pandas as pd
-import numpy as np
 import yaml
 import gzip
 import uuid
 from time import sleep
 
-from TDA import TDA_Parameters, ts_to_tda
+# TODO: Fix this dep. It should not be here. it does not need to know about
+# this method to use it
 from CastCol import cast_columns
-from CrossCorrelation import cross_cor
-from Metrics import recall_at_k, get_value_position, heap_to_ordered_list
+from experiment_runner import evaluate_subset
+from Config import configFactory
 
 
 # system_hostname = os.environ.get('SYSTEM_HOSTNAME') or 'localhost'
@@ -26,167 +23,19 @@ redis_job_notify_channel = os.environ.get(
     'REDIS_JOB_NOTIFY_CHANNEL') or 'REDIS_JOB_NOTIFY_CHANNEL'
 shared_folder = os.environ.get('SHARED_FOLDER') or './'
 
-# TODO: FIX THIS
 
-
-def ip_to_user_multi(ip, group_size=5, starting=5):
-    isp = int(int(ip.split(".")[-2]))
-    node_number = int(ip.split(".")[-1]) - starting - isp
-    user = node_number % group_size
-    group = math.floor(node_number / group_size)
-    return '/tordata/config/group_' + str(group) + "_user_" + str(user)
-
-
-def ip_to_user_single(ip, group_size=5, starting=10):
-    local_net = int(ip.split(".")[-1]) - starting
-    user = local_net % group_size
-    group = math.floor(local_net/group_size)
-    return '/tordata/config/group_' + str(group) + "_user_" + str(user)
-
-
-def compare_ts(ts1, ts2, debug=False):
-    # dtw_classic, path_classic = dtw(ts1, ts2, dist='square',
-    #                             method='classic', return_path=True)
-    # return dtw_classic
-    # print(ts1)
-    # print(ts2)
-    # dist, lag = cross_cor(pd.Series(ts1), pd.Series(ts2))
-    dist, lag = cross_cor(ts1, ts2, debug=debug)
-    # assert dist >= -1 and dist <= 1
-    dist = dist * -1  # flip for use as distance metric
-    # assert dist >= -1 and dist <= 1
-    return dist, lag
-
-
-def compare_ts_reshape(ts1, ts2, debug=False):
-    # buffer_room = 120  # in seconds
-    range = min(ts2.index.values), max(ts2.index.values)
-    ts1 = ts1.loc[(ts1.index >= range[0]) & (ts1.index <= range[1])]
-    # ts1 = ts1[(ts1['frame.time'] >= int(range[0])) &
-    #           (ts1['frame.time'] <= int(range[1]))]
-    # print(ts1)
-    # ts1 = ts1.loc[:, 'tda_pl']
-    ts1 = ts1.values[:, 0]
-
-    ts1_norm = np.array(ts1.copy())
-    ts2_norm = np.array(ts2.copy())
-
-    # delay = 0
-
-    # ts1_norm.index = ts1_norm.index + pd.DateOffset(seconds=delay)
-
-    # lock to same range with buffer room
-    # on each side to account for network (or PPT) delay
-
-    # detect if no overlap
-    if len(ts1_norm) < 2 or len(ts2_norm) < 2:
-        return float("inf"), 0
-
-    # Normalize peaks?
-    # ts1_norm = normalize_ts(ts1_norm)
-    # ts2_norm = normalize_ts(ts2_norm)
-
-    # plot_ts(ts1_norm, ts2_norm)
-    # exit(1)
-
-    # else:
-    #     ts1_norm = ts1_norm.tolist()
-    #     ts2_norm = ts2_norm.tolist()
-
-    score, lag = compare_ts(ts1_norm, ts2_norm, debug=debug)
-
-    return score, lag
-
-
-def evaluate(src_raw, dst_raw, src_features, dst_feaures, display=False, params=TDA_Parameters(0, 3, 1, 1, 1), config=None):
-    src = {}
-    dst = {}
-    for ip in src_raw:
-        try:
-            data = src_raw[ip][src_features].copy(deep=True)
-        except Exception:
-            data = pd.DataFrame(
-                0, index=src_raw[ip].index, columns=src_features)
-        if config['tda']:
-            src[ip] = ts_to_tda(data)
-        else:
-            src[ip] = data
-    for user in dst_raw:
-        try:
-            data = dst_raw[user][dst_feaures].copy(deep=True)
-        except Exception:
-            data = pd.DataFrame(
-                0, index=dst_raw[user].index, columns=dst_feaures)
-        if config['tda']:
-            dst[user] = ts_to_tda(data)
-        else:
-            dst[user] = data
-
-    correct = 0.0
-    rank_list = []
-    score_list = []
-    recall_2 = 0
-    recall_4 = 0
-    recall_8 = 0
-    rank = 0
-    for user in dst:
-        best_score = 0
-        best_user = 0
-        heap = []
-        counter = 0
-        r2 = False
-        r4 = False
-        r8 = False
-        for ip in src:
-            counter += 1
-            score, _ = compare_ts_reshape(src[ip].copy(
-                deep=True), dst[user].copy(deep=True))
-            if not math.isnan(score) and not math.isinf(score):
-                heapq.heappush(heap, (score, counter, ip_to_user(ip), ip))
-            if score < best_score:
-                best_score = score
-                best_user = ip_to_user(ip)
-        if user == best_user:
-            correct += 1
-        # print(user)
-        if recall_at_k(heap.copy(), 2, user):
-            recall_2 += 1
-            r2 = True
-        if recall_at_k(heap.copy(), 4, user):
-            recall_4 += 1
-            r4 = True
-        if recall_at_k(heap.copy(), 8, user):
-            recall_8 += 1
-            r8 = True
-        if (r2 and (not r4 or not r8)) or (r4 and not r8):
-            print("r2: " + str(r2))
-            print("r4: " + str(r4))
-            print("r8: " + str(r8))
-            raise Exception("Bad recall")
-        rank += get_value_position(heap, user)
-        rank_list += [(get_value_position(heap, user), user)]
-        score_list += [(heap_to_ordered_list(heap), user)]
-    accuracy = correct / len(src)
-    recall_2 = recall_2 / len(src)
-    recall_4 = recall_4 / len(src)
-    recall_8 = recall_8 / len(src)
-    rank = rank / len(src)
-    return accuracy, recall_2, recall_4, recall_8, rank, rank_list, score_list
-
-
-def evaluate_subset(src_df, dst_df, src_features, dst_feaures, tda_config=None, config=None):
-    score = evaluate(src_df, dst_df, list(src_features),
-                     list(dst_feaures), params=tda_config, config=config)
-    return score, src_features
-
-
+# evaluate_subset(src_df, dst_df, src_features, dst_feaures, config, ip_to_user, tda_config)
 def process_tasks(tasks, tda_config, config):
+    _, model_config = configFactory(config)
     # tasks is a list of tasks
     with mp.Pool(processes=num_cpus) as pool:
         results = []
         for task in tasks:
             results.append(pool.apply_async(evaluate_subset, args=(
-                manager.src_df, manager.dst_df, task["src_feature"], task["dst_feature"], tda_config, config)))
+                manager.src_df, manager.dst_df, task["src_feature"], task["dst_feature"],
+                # tda_config, config
+                model_config, model_config.ip_to_user, tda_config
+                )))
 
         filename = f'{system_hostname}_{task["filename"]}'
         path = f'{shared_folder}/results/{experiment_name}/{filename}'
@@ -274,10 +123,6 @@ if __name__ == "__main__":
         # set variables for multiprocessing in manager
         manager.src_df = src_df
         manager.dst_df = dst_df
-
-        ip_to_user = ip_to_user_single  # default to single user
-        if config_for_job["multiISP"]:
-            ip_to_user = ip_to_user_multi
 
         print("Loaded dataframes from pickle file")
 
