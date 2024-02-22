@@ -1,0 +1,41 @@
+---
+experiment_name: "dns_all_scopes_https_multiISP"
+DEBUG: False
+pcappath: "../https/podns/data/csv/"
+logpath: "../https/podns/data/server_log/"
+window: "30 seconds" # cache size but maybe smaller
+tda: False
+# Scopes will be proccessed in order. Ensure order takes path most likely for
+# communication
+scope_config:
+  - [".*isp.*.csv", "ISPAll", none, [True, False]]
+  - [".*isp-1.csv", "ISP1", none, [True, False]]
+  - [".*isp-2.csv", "ISP2", none, [True, False]]
+  - [".*isp-3.csv", "ISP3", none, [True, False]]
+  - [".*isp-4.csv", "ISP4", none, [True, False]]
+  - [".*isp-5.csv", "ISP5", none, [True, False]]
+  - [".*isp-6.csv", "ISP6", none, [True, False]]
+  - [".*isp-7.csv", "ISP7", none, [True, False]]
+  - [".*isp-8.csv", "ISP8", none, [True, False]]
+  - [".*isp-9.csv", "ISP9", none, [True, False]]
+  - [".*isp-10.csv", "ISP10", none, [True, False]]
+  - [".*resolver.*", "resolver", dot_filter, [True, False]]
+  - ["(.*root).*.csv", "root", dot_filter, [True, True] ]
+  - ["(.*sld).*.csv", "SLD", dot_filter, [True, True] ]
+  - ["(.*tld).*.csv", "TLD", dot_filter, [True, True] ]
+  - [".*access-to-service.csv", "Access_service", none, [True, False]]
+  - [".*/service.csv", "Service", none, [True, False]]
+server_logs: [".*pythonServerThread.stdout", "chatlogs"]
+evil_domain: 'evil.dne'
+bad_features: ['tcp.srcport', 'udp.srcport', 'tcp.seq',
+                'frame.number', 'frame.time_relative', 'frame.time_delta']
+output_file: "output.csv"
+num_cpus: 30
+skip: 1
+dim: 0
+tda_window: 3
+k: 9
+thresh: "inf"
+# Optional
+# Will be removed from search
+infra_ip: ['192.168.150.10']

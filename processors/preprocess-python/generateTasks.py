@@ -6,6 +6,9 @@ import pickle
 import yaml
 from datetime import datetime
 
+# setting path
+sys.path.append('../../flow2text/src')
+
 from CastCol import cast_columns
 
 

@@ -1,0 +1,41 @@
+import importlib
+import pandas as pd
+from ip_convert import ip_to_user_multi, ip_to_user_single
+from TDA import TDA_Parameters
+
+
+class DataConfig:
+    def __init__(self, config):
+        self.p_filename = config['experiment_name'] + "_ts.pkl.gz"
+
+        module = importlib.import_module('ScopeFilters')
+        for scope in config['scope_config']:
+            scope[2] = getattr(module, scope[2])
+        self.pcappath = config['pcappath']
+        self.logpath = config['logpath']
+        self.scope_config = config['scope_config']
+        self.server_logs = config['server_logs']
+        self.infra_ip = config['infra_ip']
+        self.window = pd.Timedelta(config['window'])
+        self.evil_domain = config['evil_domain']
+        self.bad_features = config['bad_features']
+        self.DEBUG = config['DEBUG']
+
+
+class ModelConfig:
+    def __init__(self, config):
+        self.ip_to_user = ip_to_user_single
+        self.num_cpus = config["num_cpus"]
+        self.tda = config["tda"]
+        self.name = config["experiment_name"]
+        if config['multiISP']:
+            self.ip_to_user = ip_to_user_multi
+        self.tda_config = TDA_Parameters(config['dim'],
+                                    config['tda_window'],
+                                    config['skip'],
+                                    config['k'],
+                                    float(config['thresh']))
+
+
+def configFactory(config):
+    return DataConfig(config), ModelConfig(config)
