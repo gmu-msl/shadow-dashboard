@@ -20,9 +20,13 @@ WORKDIR /app
 COPY evaluators /app
 
 COPY flow2text/src /app
+COPY flow2text/pyproject.toml /app/pyproject.toml
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# # Install all needed packages
+RUN /root/.local/bin/poetry install --no-root
 
 # Run the Python script when the container launches
-CMD ["python3", "evaluateTimeseries.py"]
+CMD ["/root/.local/bin/poetry", "run", "python3", "evaluateTimeseries.py"]
