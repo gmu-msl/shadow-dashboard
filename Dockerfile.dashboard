@@ -35,4 +35,4 @@ COPY . .
 EXPOSE 3000
 
 # Run the app
-CMD [ "/root/.local/bin/poetry", "run", "npm", "start" ]
+CMD [ "/root/.local/bin/poetry", "run", "-C", "/usr/src/app/processors/preprocess-python/", "npm", "start" ]
