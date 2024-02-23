@@ -1,7 +1,15 @@
 import importlib
 import pandas as pd
 from ip_convert import ip_to_user_multi, ip_to_user_single
-from TDA import TDA_Parameters
+
+
+class TDA_Parameters:
+    def __init__(self, dim, window, skip, k, thresh):
+        self.dim = dim
+        self.window = window
+        self.skip = skip
+        self.k = k
+        self.thresh = thresh
 
 
 class DataConfig:

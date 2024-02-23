@@ -1,6 +1,7 @@
 from ripser import ripser
 import fast_pl_py
 import pandas as pd
+from Config import TDA_Parameters
 
 
 def my_dist(ts1, ts2, ip1="", ip2=""):
@@ -18,15 +19,6 @@ def rip_ts(window, dim, skip, data, thresh=float("inf")):
 def tda_trans(pairs, k=2, debug=False):
     pairs = [(x[0], x[1]) for x in pairs]
     return fast_pl_py.pairs_to_l2_norm(pairs, k, debug)
-
-
-class TDA_Parameters:
-    def __init__(self, dim, window, skip, k, thresh):
-        self.dim = dim
-        self.window = window
-        self.skip = skip
-        self.k = k
-        self.thresh = thresh
 
 
 def ts_to_tda(data, params, debug=False):

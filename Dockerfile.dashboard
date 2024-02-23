@@ -10,11 +10,20 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3-
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Copy python requirements
-COPY processors/preprocess-python/requirements.txt /usr/src/app/processors/preprocess-python/requirements.txt
+# install rust for fast_pl_py
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-# install python dependencies
-RUN pip3 install -r /usr/src/app/processors/preprocess-python/requirements.txt --break-system-packages
+# Make rust available in the path
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Copy python requirements
+COPY flow2text/pyproject.toml /usr/src/app/processors/preprocess-python/pyproject.toml
+
+# # Install all needed packages
+RUN /root/.local/bin/poetry install --no-root -C /usr/src/app/processors/preprocess-python/
 
 # Install app dependencies
 RUN npm install
@@ -26,4 +35,4 @@ COPY . .
 EXPOSE 3000
 
 # Run the app
-CMD [ "npm", "start" ]
+CMD [ "/root/.local/bin/poetry", "run", "npm", "start" ]

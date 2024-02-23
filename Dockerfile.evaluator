@@ -26,7 +26,7 @@ COPY flow2text/pyproject.toml /app/pyproject.toml
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # # Install all needed packages
-RUN /root/.local/bin/poetry install --no-root
+RUN /root/.local/bin/poetry install --no-root --with tda
 
 # Run the Python script when the container launches
 CMD ["/root/.local/bin/poetry", "run", "python3", "evaluateTimeseries.py"]
