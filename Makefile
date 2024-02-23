@@ -6,6 +6,10 @@ all:
 	$(MAKE) update_dashboard
 	$(MAKE) update_evaluator
 
+release_all: 
+	$(MAKE) release_dashboard
+	$(MAKE) release_evaluator
+
 _builder:
 	docker build -t sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64 --platform linux/amd64 -f ${_BUILD_ARGS_DOCKERFILE} .
  
