@@ -1,4 +1,3 @@
-import itertools
 import multiprocessing as mp
 import heapq
 from datetime import datetime
@@ -12,6 +11,7 @@ from Metrics import recall_at_k, heap_to_ordered_list, get_value_position
 from sim import compare_ts_reshape
 from Config import configFactory
 from Preprocess import get_df
+from Tasks import findsubsets, get_features
 
 
 def run_experiment(config):
@@ -116,20 +116,9 @@ def evaluate(src_raw, dst_raw, src_features, dst_feaures, config, ip_to_user,
     return accuracy, recall_2, recall_4, recall_8, rank, rank_list, score_list
 
 
-def findsubsets(s, n):
-    return list(itertools.combinations(s, n))
-
-
 def evaluate_subset(src_df, dst_df, src_features, dst_feaures, config, ip_to_user, tda_config):
     score = evaluate(src_df, dst_df, list(src_features), list(dst_feaures), config, ip_to_user, params=tda_config)
     return score, src_features
-
-
-def get_features(df):
-    features = []
-    for src in df:
-        features += df[src].columns.tolist()
-    return list(set(features))
 
 
 def iterate_features(src_df, dst_df, n, dst_features, filename, config):

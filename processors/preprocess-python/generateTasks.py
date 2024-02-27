@@ -8,7 +8,7 @@ from datetime import datetime
 sys.path.append('../../flow2text/src')
 
 from CastCol import cast_columns
-from experiment_runner import findsubsets, get_features
+from Tasks import findsubsets, get_features
 
 
 if len(sys.argv) < 5:
