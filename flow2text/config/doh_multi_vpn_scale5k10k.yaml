@@ -1,8 +1,8 @@
 ---
 experiment_name: "doh_multi_vpn_scale1000_5_10_USENIX_"
 DEBUG: True
-pcappath: "../data/data/100_clients_doh_https_multi_isp_vpn_without_conversion_5k-10k/csv/"
-logpath: "../data/data/100_clients_doh_https_multi_isp_vpn_without_conversion_5k-10k/server_log/"
+pcappath: "../../Shadow-data-analysis/DoT/data/data/100_clients_doh_https_multi_isp_vpn_without_conversion_5k-10k/csv/"
+logpath: "../../Shadow-data-analysis/DoT/data/data/100_clients_doh_https_multi_isp_vpn_without_conversion_5k-10k/server_log/"
 window: "1 seconds" # cache size but maybe smaller
 tda: False
 multiISP: True
