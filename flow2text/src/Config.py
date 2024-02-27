@@ -35,10 +35,13 @@ class DataConfig:
         self.evil_domain = config['evil_domain']
         self.bad_features = config['bad_features']
         self.DEBUG = config['DEBUG']
+        self.debug = config['DEBUG']
 
 
 class ModelConfig:
     def __init__(self, config):
+        self.DEBUG = config['DEBUG']
+        self.debug = config['DEBUG']
         self.ip_to_user = ip_to_user_single
         self.num_cpus = config["num_cpus"]
         self.tda = config["tda"]
@@ -52,5 +55,5 @@ class ModelConfig:
                                          float(config['thresh']))
 
 
-def configFactory(config):
-    return DataConfig(config), ModelConfig(config)
+def configFactory(config, pcappath=None, logpath=None):
+    return DataConfig(config, pcappath=pcappath, logpath=logpath), ModelConfig(config)

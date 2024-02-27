@@ -106,7 +106,7 @@ const processUsingPythonProcessor = async ({
       const csvFolderParam = `./${experimentName}/${unzippedFolderName}/csv/`;
       const serverLogFolderParam = `./${experimentName}/${unzippedFolderName}/server_log/`;
 
-      const processorCommand = `cd ${PRE_PROCESSOR_PATH} && python3 loadFilesAndGeneratePickle.py ${configFileParam} ${pickleFileName} ${csvFolderParam} ${serverLogFolderParam}`;
+      const processorCommand = `cd ${PRE_PROCESSOR_PATH} && /root/.local/bin/poetry run python3 loadFilesAndGeneratePickle.py ${configFileParam} ${pickleFileName} ${csvFolderParam} ${serverLogFolderParam}`;
       const processorCommandExec = await exec(processorCommand);
 
       console.log('processorCommandExec completed');
@@ -128,7 +128,7 @@ const processUsingPythonProcessor = async ({
       pickleFileName,
     });
 
-    const generateTasksCommand = `cd ${PRE_PROCESSOR_PATH} && python3 generateTasks.py ${experimentName} ${pickleFileName} ${REDIS_HOST} ${redisTopicForJobs}`;
+    const generateTasksCommand = `cd ${PRE_PROCESSOR_PATH} && /root/.local/bin/poetry run python3 generateTasks.py ${experimentName} ${pickleFileName} ${REDIS_HOST} ${redisTopicForJobs}`;
     const generateTasksCommandExec = await exec(generateTasksCommand);
 
     console.log('generateTasksCommandExec completed');
