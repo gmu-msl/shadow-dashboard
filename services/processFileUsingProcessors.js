@@ -111,7 +111,7 @@ const processUsingPythonProcessor = async ({
 
       console.log('processorCommandExec completed');
 
-        pickleFilePath = `${PRE_PROCESSOR_PATH}/${pickleFileName}`;
+        let pickleFilePath = `${PRE_PROCESSOR_PATH}/${pickleFileName}`;
 
         const cpPickleFileCommand = `cp ${pickleFilePath} ${SHARED_FOLDER}`;
         const cpPickleFileCommandExec = await exec(cpPickleFileCommand);
