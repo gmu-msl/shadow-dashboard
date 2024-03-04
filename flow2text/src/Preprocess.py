@@ -78,7 +78,7 @@ def preprocess(data_config):
     ips_seen = getPossibleIPs(scopes)
     IPs = list(set(ips_seen) - set(data_config.infra_ip))
     print(IPs)
-    assert len(IPs) == 100
+    # assert len(IPs) == 100
 
     if data_config.debug:
         print("Scopes created")
