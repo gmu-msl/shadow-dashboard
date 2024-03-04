@@ -13,7 +13,7 @@ from time import sleep
 # this method to use it
 from CastCol import cast_columns
 from experiment_runner import evaluate_subset
-from Config import configFactory
+from Config import ModelConfig
 
 
 # system_hostname = os.environ.get('SYSTEM_HOSTNAME') or 'localhost'
@@ -24,9 +24,8 @@ redis_job_notify_channel = os.environ.get(
 shared_folder = os.environ.get('SHARED_FOLDER') or './'
 
 
-# evaluate_subset(src_df, dst_df, src_features, dst_feaures, config, ip_to_user, tda_config)
 def process_tasks(tasks, tda_config, config):
-    _, model_config = configFactory(config)
+    model_config = ModelConfig(config)
     # tasks is a list of tasks
     with mp.Pool(processes=num_cpus) as pool:
         results = []
