@@ -6,7 +6,6 @@ from datetime import datetime
 
 # setting path
 sys.path.append('../../flow2text/src')
-
 from CastCol import cast_columns
 from Tasks import findsubsets, get_features
 
@@ -40,8 +39,8 @@ for user in client_chat_logs:
 # get tasks
 tasks = []
 
-for n in range(1, 3):
-    for output_size in range(1, len(client_chat_logs) + 1):
+for n in range(1, 2):
+    for output_size in range(1, 2):
         for features in findsubsets(get_features(client_chat_logs), output_size):
             src_features_for_dst_features = findsubsets(get_features(flows_ts_ip_total), n)
             key = f"{output_size}_{n}_{features}"
