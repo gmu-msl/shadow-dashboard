@@ -63,6 +63,7 @@ def tda_transform(src_raw, src_features, dst_raw, dst_feaures, config, params):
 
 def evaluate(src_raw, dst_raw, src_features, dst_feaures, config, ip_to_user,
              display=False, params=TDA_Parameters(0, 3, 1, 1, 1)):
+
     src, dst = tda_transform(src_raw, src_features, dst_raw, dst_feaures, config, params)
 
     correct = 0.0
@@ -82,9 +83,10 @@ def evaluate(src_raw, dst_raw, src_features, dst_feaures, config, ip_to_user,
         r8 = False
         for ip in src:
             counter += 1
-            score, _ = compare_ts_reshape(src[ip], dst[user])
+            score, _ = compare_ts_reshape(src[ip].copy(
+                deep=True), dst[user].copy(deep=True))
             if not math.isnan(score) and not math.isinf(score):
-                heapq.heappush(heap, (score, counter, ip_to_user(ip)))
+                heapq.heappush(heap, (score, counter, ip_to_user(ip), ip))
             if score < best_score:
                 best_score = score
                 best_user = ip_to_user(ip)
