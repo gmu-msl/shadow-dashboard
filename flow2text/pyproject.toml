@@ -26,6 +26,12 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.2"
+
 [tool.poetry.group.tda]
 optional = true
 
