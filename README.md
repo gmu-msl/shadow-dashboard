@@ -18,7 +18,7 @@
   - `REDIS_DASHBOARD_EXPERIMENTS_SET:<experiment-name>` hash
     - run `del REDIS_DASHBOARD_EXPERIMENTS_SET:<experiment-name>`
   - remove the experiment from the set of experiments
-    - run `srem REDIS_DASHBOARD_EXPERIMENTS <experiment-name>`
+    - run `srem REDIS_DASHBOARD_EXPERIMENTS_SET <experiment-name>`
 
 - Exit the redis cli and the container
 - remove results for the experiment from the `results` directory in processor-common-folder (if it exists)
