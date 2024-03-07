@@ -1,0 +1,32 @@
+---
+experiment_name: "doh_new_scale1000_tda_"
+DEBUG: True
+pcappath: "../data/data/data/csv/"
+logpath: "../data/data/data/server_log/"
+window: "1 seconds" # cache size but maybe smaller
+tda: True
+# Scopes will be proccessed in order. Ensure order takes path most likely for
+# communication
+scope_config:
+  - [".*isp.*.csv", "ISPAll", none, [True, False]]
+  - [".*isp-1.csv", "ISP1", none, [True, False]]
+  - [".*resolver.*", "resolver", dot_filter, [True, False]]
+  - ["(.*root).*.csv", "root", dot_filter, [True, True] ]
+  - ["(.*sld).*.csv", "SLD", dot_filter, [True, True] ]
+  - ["(.*tld).*.csv", "TLD", dot_filter, [True, True] ]
+  - [".*access-to-service.csv", "Access_service", none, [True, False]]
+  - [".*/service.csv", "Service", none, [True, False]]
+server_logs: [".*pythonServerThread.stdout", "chatlogs"]
+evil_domain: 'evil.dne'
+bad_features: ['tcp.srcport', 'udp.srcport', 'tcp.seq',
+                'frame.number', 'frame.time_relative', 'frame.time_delta']
+output_file: "output.csv"
+num_cpus: 40
+skip: 1
+dim: 0
+tda_window: 3
+k: 9
+thresh: "inf"
+# Optional
+# Will be removed from search
+infra_ip: ['192.168.150.10', '101.0.0.10', '101.0.0.20']

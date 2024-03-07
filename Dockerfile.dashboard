@@ -1,0 +1,38 @@
+FROM node:20
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# install python3-pip and tshark
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3-pip tshark \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# install rust for fast_pl_py
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+# Make rust available in the path
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Copy python requirements
+COPY flow2text/pyproject.toml /usr/src/app/processors/preprocess-python/pyproject.toml
+
+# # Install all needed packages
+RUN /root/.local/bin/poetry install --no-root -C /usr/src/app/processors/preprocess-python/
+
+# Install app dependencies
+RUN npm install
+
+# Bundle app source
+COPY . .
+
+# Expose port 3000
+EXPOSE 3000
+
+# Run the app
+CMD [ "/root/.local/bin/poetry", "run", "-C", "/usr/src/app/processors/preprocess-python/", "npm", "start" ]

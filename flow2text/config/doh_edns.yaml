@@ -1,0 +1,31 @@
+---
+experiment_name: "doh_all_scopes_https_tda_edns"
+DEBUG: False
+pcappath: "../https/doh/100_clients_doh_https_edns/csv/"
+logpath: "../https/doh/100_clients_doh_https_edns/server_log/"
+window: "30 seconds" # cache size but maybe smaller
+tda: True
+# Scopes will be proccessed in order. Ensure order takes path most likely for
+# communication
+scope_config:
+  - [".*isp.*.csv", "ISP", none, [True, False]]
+  - [".*resolver.*", "resolver", dot_filter, [True, False]]
+  - ["(.*root).*.csv", "root", dot_filter, [True, True] ]
+  - ["(.*sld).*.csv", "SLD", dot_filter, [True, True] ]
+  - ["(.*tld).*.csv", "TLD", dot_filter, [True, True] ]
+  - [".*access-to-service.csv", "Access_service", none, [True, False]]
+  - [".*/service.csv", "Service", none, [True, False]]
+server_logs: [".*pythonServerThread.stdout", "chatlogs"]
+evil_domain: 'evil.dne'
+bad_features: ['tcp.srcport', 'udp.srcport', 'tcp.seq',
+                'frame.number', 'frame.time_relative', 'frame.time_delta']
+output_file: "output.csv"
+num_cpus: 8
+skip: 1
+dim: 0
+tda_window: 3
+k: 9
+thresh: "inf"
+# Optional
+# Will be removed from search
+infra_ip: []

@@ -1,11 +1,13 @@
-import importlib
 import yaml
 import sys
 import pickle
 import pandas as pd
 
 # Local Imports
+# setting path
+sys.path.append('../../flow2text/src')
 from Preprocess import preprocess
+from Config import configFactory
 
 # pandas disable chained assignment warning
 pd.options.mode.chained_assignment = None
@@ -24,33 +26,19 @@ pcappath = sys.argv[3]
 logpath = sys.argv[4]
 
 with open(config_file, 'r') as file:
-    config = yaml.safe_load(file)
+    config_raw = yaml.safe_load(file)
+data_config, model_config = configFactory(config_raw,
+                                          logpath=logpath,
+                                          pcappath=pcappath)
 # ==============================================================================
 # END Config
 # ==============================================================================
 
-window = pd.Timedelta(config['window'])
-
-module = importlib.import_module('ScopeFilters')
-for scope in config['scope_config']:
-    scope[2] = getattr(module, scope[2])
-
-src, dst = preprocess(pcappath,
-                      logpath,
-                      config['scope_config'],
-                      config['server_logs'],
-                      config['infra_ip'],
-                      window,
-                      config['evil_domain'],
-                      config['bad_features'],
-                      debug=config['DEBUG'])
+src, dst = preprocess(data_config)
 
 with open(output_filename, 'wb') as file:
     pickle.dump(src, file)
     pickle.dump(dst, file)
-
-    # close the pickle file
-    file.close()
 
 
 # exit

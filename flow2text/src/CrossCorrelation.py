@@ -29,5 +29,5 @@ def cross_cor(ts1, ts2, debug=False, max_offset=300, only_positive=True):
         print('best cross correlation: ' + str(best_cor) + " at time lag: " + str(best_lag))
         print(len(ccf))
         print(ccf)
-        # ccf_plot(range(len(ccf)), ccf)
+        ccf_plot(range(len(ccf)), ccf)
     return best_cor, best_lag
