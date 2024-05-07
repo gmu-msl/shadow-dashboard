@@ -17,7 +17,7 @@ _pusher:
 	docker push sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64
  
 _releaser:
-	docker service update shadow-dashboard_${_BUILD_ARGS_NAME} --with-registry-auth --image sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64
+	docker service update shadow-dashboard_${_BUILD_ARGS_NAME} --with-registry-auth --image sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64 --force
 
 build:
 	$(MAKE) _builder
