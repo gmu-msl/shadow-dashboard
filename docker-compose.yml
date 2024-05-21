@@ -67,7 +67,7 @@ volumes:
     driver: local
     driver_opts:
       type: nfs
-      o: addr=10.192.113.102,rw,nfsvers=4
+      o: addr=${NFS_SERVER_IP},rw,nfsvers=4
       device: ':/vol/vol1_home/docker/docker-swarm-volumes/processor-common-folder'
   redis-data:
     driver: local # this is a local volume, not on NFS
