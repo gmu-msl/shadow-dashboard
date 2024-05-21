@@ -5,9 +5,6 @@ services:
     image: mongo:7
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 27017:27017
     volumes:
@@ -18,9 +15,6 @@ services:
     image: redis:7.2
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 6379:6379
     volumes:
@@ -28,12 +22,10 @@ services:
     command: redis-server --bind 0.0.0.0 --appendonly yes # enable persistence using AOF
 
   dashboard:
-    image: ${DOCKER_REGISTRY}/shadow-dashboard:amd64
+    build:
+      dockerfile: Dockerfile.dashboard
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 8080:8080
     volumes:
@@ -49,11 +41,10 @@ services:
     command: npm start
 
   evaluator:
-    image: ${DOCKER_REGISTRY}/shadow-evaluator:amd64
+    build:
+      dockerfile: Dockerfile.evaluator
     deploy:
       replicas: 1
-      placement:
-        max_replicas_per_node: 1 # only one evaluator per node
     volumes:
       - processor_data_nfs:/app/processor-common-folder
     environment:
