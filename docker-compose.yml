@@ -7,7 +7,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == sr3s13 # place this on sr3s13
+          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 27017:27017
     volumes:
@@ -20,7 +20,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == sr3s13 # place this on sr3s13
+          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 6379:6379
     volumes:
@@ -28,12 +28,12 @@ services:
     command: redis-server --bind 0.0.0.0 --appendonly yes # enable persistence using AOF
 
   dashboard:
-    image: sr4s5.mesa.gmu.edu:5000/shadow-dashboard:amd64
+    image: ${DOCKER_REGISTRY}/shadow-dashboard:amd64
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == sr3s13 # place this on sr3s13
+          - node.hostname == ${DASHBOARD_HOSTNAME}
     ports:
       - 8080:8080
     volumes:
@@ -49,7 +49,7 @@ services:
     command: npm start
 
   evaluator:
-    image: sr4s5.mesa.gmu.edu:5000/shadow-evaluator:amd64
+    image: ${DOCKER_REGISTRY}/shadow-evaluator:amd64
     deploy:
       replicas: 3
       placement:
