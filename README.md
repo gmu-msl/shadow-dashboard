@@ -68,9 +68,9 @@ Note the files can have any name so long as the thing extension and file format 
 The messages file should be formatted as a TSV (tab separated values). It should have columns for timestamp, data format and the data itself as a JSON dump. An example is provided below
 
 ```
-1698887338.135741   application/json	{"username": "/tordata/config/group_1_user_0", "text": "An example message"}
-1698887338.2363834	application/json	{"username": "/tordata/config/group_0_user_2", "text": "Another message"}
-1698887338.6288576	application/json	{"username": "/tordata/config/group_1_user_0", "text": "A third message"}
+1698887338.135741   application/json	{"username": "group_1_user_0", "text": "An example message"}
+1698887338.2363834	application/json	{"username": "group_0_user_2", "text": "Another message"}
+1698887338.6288576	application/json	{"username": "group_1_user_0", "text": "A third message"}
 ```
 
 ### PCAP names
