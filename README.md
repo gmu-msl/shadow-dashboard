@@ -2,7 +2,8 @@
 
 ## Local Host
 
-> WARNING: This type of deployment is still a work in progress. 
+> WARNING: This type of deployment is still a work in progress.
+> 
 > WARNING: This type of deployment is very slow!
 
 This is intended for use on a single development machine.
