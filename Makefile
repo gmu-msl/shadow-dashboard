@@ -1,8 +1,8 @@
+include .env
+
 _BUILD_ARGS_RELEASE_TAG ?= latest
 _BUILD_ARGS_DOCKERFILE ?= Dockerfile
 _BUILD_ARGS_NAME ?= DEFAULT
-
-DOCKER_REGISTRY=sr4s5.mesa.gmu.edu:5000
 
 all: 
 	$(MAKE) update_dashboard
