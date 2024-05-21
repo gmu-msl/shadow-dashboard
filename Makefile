@@ -2,6 +2,8 @@ _BUILD_ARGS_RELEASE_TAG ?= latest
 _BUILD_ARGS_DOCKERFILE ?= Dockerfile
 _BUILD_ARGS_NAME ?= DEFAULT
 
+DOCKER_REGISTRY=sr4s5.mesa.gmu.edu:5000
+
 all: 
 	$(MAKE) update_dashboard
 	$(MAKE) update_evaluator
@@ -11,13 +13,13 @@ release_all:
 	$(MAKE) release_evaluator
 
 _builder:
-	docker build -t sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64 --platform linux/amd64 -f ${_BUILD_ARGS_DOCKERFILE} .
+	docker build -t ${DOCKER_REGISTRY}/shadow-${_BUILD_ARGS_NAME}:amd64 --platform linux/amd64 -f ${_BUILD_ARGS_DOCKERFILE} .
  
 _pusher:
-	docker push sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64
+	docker push ${DOCKER_REGISTRY}/shadow-${_BUILD_ARGS_NAME}:amd64
  
 _releaser:
-	docker service update shadow-dashboard_${_BUILD_ARGS_NAME} --with-registry-auth --image sr4s5.mesa.gmu.edu:5000/shadow-${_BUILD_ARGS_NAME}:amd64 --force
+	docker service update shadow-dashboard_${_BUILD_ARGS_NAME} --with-registry-auth --image ${DOCKER_REGISTRY}/shadow-${_BUILD_ARGS_NAME}:amd64 --force
 
 build:
 	$(MAKE) _builder
