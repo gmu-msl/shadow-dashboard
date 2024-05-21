@@ -84,8 +84,11 @@ scope_config:
 ```
 
 Each value in the `scope_config` list defines a different grouping of PCAPs (each PCAP group will be treated as if it were a single PCAP). 
+
 The first value (e.g. ".*isp-1.csv") is a quoted regex of the pcap files in that group/scope (note the csv extension should be used instead of the .pcap extension. this format change will happen during proccessing automatically).
+
 The second value is friendly name for the scope displayed in the GUI. 
+
 The third and fourth parameters are special arguments that can be applied for certain scopes. If the scope only has DNS data then `dot_filter` should be used (captures all DNS traffic not just DoT). The last parameter should be set to `[True, False]` in almost every case. Setting this to `[True, True]` will dramatically increase processing time on most analysis and does not generally improve performance.
 
 ## Cleaning up runs from dashboard
