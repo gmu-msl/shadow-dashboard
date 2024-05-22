@@ -22,5 +22,6 @@ for f in $(find $DIRECTORY -type f -name "*.pcap"); do
         -e http.request -e udp.dstport -e udp.srcport -e frame.time_relative -e frame.time_delta -e tcp.time_relative -e tcp.time_delta \
         -e tcp.payload -e dns.qry.name -e dns.opt.client.addr4 -e dns.opt.client.addr6 -e dns.opt.client.addr\
         -E header=y -E separator=, -E quote=d \
-        -E occurrence=f> ./"${base%.pcap}.csv"
+        -E occurrence=f> ./"${base%.pcap}.csv" &
 done
+wait
