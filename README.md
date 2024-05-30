@@ -14,7 +14,7 @@ $ cp docker-compose.yml.singleHost docker-compose.yml
 ### Steps to update the deployment
 
 ```bash
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 The dashboard will be available on `localhost:8080`.
