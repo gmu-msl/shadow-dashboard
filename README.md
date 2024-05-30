@@ -1,5 +1,25 @@
 # Shadow Dashboard
 
+## Docker version
+
+```
+$ docker compose version
+Docker Compose version v2.27.0-desktop.2
+```
+
+```
+$ docker version
+Client: Docker Engine - Community
+ Cloud integration: v1.0.35+desktop.13
+ Version:           26.1.3
+ API version:       1.45
+ Go version:        go1.21.10
+ Git commit:        b72abbb
+ Built:             Thu May 16 08:33:29 2024
+ OS/Arch:           linux/amd64
+ Context:           default
+```
+
 ## Local Host
 
 > WARNING: This type of deployment is very slow!
